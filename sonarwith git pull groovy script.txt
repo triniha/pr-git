@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    // Clone the GitHub repository
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/main']], // Specify your desired branch
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'LocalBranch', localBranch: 'main']],
+                        submoduleCfg: [],
+                        userRemoteConfigs: [[url: 'https://github.com/surajn17/niharika.git']] // Specify your repository URL
+                    ])
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv('SonarScanner') {
+                        // Run the SonarScanner using the configured tool
+                        sh """
+                            /var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarScanner/bin/sonar-scanner -X -Dsonar.projectKey=my-sonar -Dsonar.sources=. -Dsonar.host.url=http://3.111.168.56:9000 -Dsonar.login=97cb09216b9558c39c484bc6ed9d9fa471d4f670
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Update Server') {
+            steps {
+                // Perform a git pull on the local repository
+                sh "cd /var/www/niharika/niharika && git pull"
+            }
+        }
+    }
+}
