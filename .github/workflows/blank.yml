@@ -15,17 +15,16 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
 
-      # https://github.com/marketplace/actions/github-pull-request-action
-      - name: create pull request
-        id: open-pr
-        uses: repo-sync/pull-request@v2
-        with:
-          github_token: ${{ secrets.TOKEN }}
-          destination_branch: ${{ github.event.repository.default_branch }}
-          pr_title: "[Automated] Merge ${{ github.ref_name }} into ${{ github.event.repository.default_branch }}"
-          pr_body: "Automated Pull Request"
+      # Your other steps for creating a pull request
 
-      # https://github.com/marketplace/actions/enable-pull-request-automerge
+      # Assign reviewer surajn17
+      - name: Assign Reviewer
+        run: gh pr review --approve --body "Automated Approval" --comment "Automated Approval" --reviewer surajn17
+
+      # Minimal status check example (replace with your actual CI/CD workflow)
+      - name: Run CI Checks
+        run: echo "Run your CI checks here"
+
       - name: enable automerge
         if: steps.open-pr.outputs.pr_number != ''
         uses: peter-evans/enable-pull-request-automerge@v2
